@@ -8,6 +8,8 @@
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
+import ipdb
+
 
 class tokenizer(object):
     def __init__(self,
@@ -17,12 +19,18 @@ class tokenizer(object):
             interpunctuations = [',', '.', ':', ';', '?', '(', ')', '[', ']', '&', '!', '*', '@', '#', '$', '%']
         self.stemer = stemer
         self.interpunctuations = interpunctuations
-        self.word_to_id = {}
-        self.id_to_word = {}
+        self.word_to_id = {
+            '<unk>': 0
+        }
+        self.id_to_word = {
+            0: '<unk>'
+        }
 
+    # todo 后续考虑加入仅有出现次数足够多的word放进去
     def fit_on_text(self,
-                 s: str) -> list[str]:
+                    s: str) -> None:
         # 以空格形式实现分词,除去停用词等可以动态加入
+        s = s.lower()
         tokens = word_tokenize(s)
         tokens = [token for token in tokens if
                   token not in self.interpunctuations and token not in stopwords.words("english")]
@@ -31,15 +39,36 @@ class tokenizer(object):
             if word not in self.word_to_id:
                 new_id = len(self.word_to_id)
                 self.word_to_id[word] = new_id
-                self.id_to_word[id] = word
+                self.id_to_word[new_id] = word
         # sentence = sent_tokenize(s)
-        return stem_word
-    def convert_id
+        return
+
+    def convert_word_to_id(self, words: list[str]) -> list[int]:
+        ret = []
+        for word in words:
+            word = word.lower()
+            tem_word = self.stemer.stem(word)
+            if tem_word in self.word_to_id:
+                # ipdb.set_trace()
+                ret.append(self.word_to_id[tem_word])
+            else:
+                ret.append(self.word_to_id['<unk>'])
+        return ret
+
+    def convert_id_to_word(self, ids: list[int]) -> list[str]:
+        ret = []
+        for id in ids:
+            assert id in self.id_to_word
+            ret.append(self.id_to_word[id])
+        return ret
 
 
 if __name__ == '__main__':
     paragraph = "The first time I heard that song was in Hawaii on radio. I was just a kid, and loved it very much! What a fantastic song!"
-    tz = Tokenizer(num_words=50)
-    tz.fit_on_texts(paragraph)
-
-    print(tz.texts_to_sequences(paragraph))
+    print(paragraph)
+    tz = tokenizer()
+    tz.fit_on_text(paragraph)
+    ids = tz.convert_word_to_id(word_tokenize(paragraph))
+    print(ids)
+    words = tz.convert_id_to_word(ids)
+    print(" ".join(words))
