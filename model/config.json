@@ -1,0 +1,9 @@
+{
+  "Batch Size":128,
+  "learning parameters":0.001,
+  "β1":0.9,
+  "β2":0.999,
+  "ap" :1e08,
+  "decay":0.0,
+  "Dropout":0.5
+}
