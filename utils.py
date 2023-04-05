@@ -63,7 +63,7 @@ class Log:
         if path.exists():
             tem.extend(OrJson.load(path))
         tem.append(info)
-        OrJson.dump(tem, Path)
+        OrJson.dump(tem, path)
 
 
 class String:

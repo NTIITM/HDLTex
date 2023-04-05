@@ -1,4 +1,6 @@
 import pathlib
+
+import ipdb
 import torch
 import torch.utils.data as data
 import tqdm
@@ -39,16 +41,20 @@ class trainer():
         return X, Y, tokenizer
 
     # 通过给定的数据训练对应的模型,实现一个函数训练分层模型
-    def train_model(self, X, Y, num_classes, tokenize, model_path, model_name, Batch_size=32,
+    def train_model(self, X, Y, num_classes, tokenize, model_path, model_name, skip=False, Batch_size=32,
                     loss=torch.nn.CrossEntropyLoss(reduction="mean"),
                     net=None,
                     device=torch.device("cuda:0"), num_epoch=300):
+        if (model_path / model_name).exists() and skip:
+            #  处理已有模型文件时,不需要再次训练
+            return
         utils.Log.info(f"开始训练模型")
         # model_path = pathlib.Path().cwd() / model_name
         net = lower_model.lower_model(embedding_size=len(tokenize.word_to_id), num_classes=num_classes).to(device)
         X = [torch.tensor(tokenize.convert_word_to_id(x)) for x in tqdm.tqdm(X, desc="正在将X转化为id形式")]
         X = torch.nn.utils.rnn.pad_sequence(X, batch_first=True)
         Y = torch.tensor(Y)
+        # print(Y)
         source = dataset.dataSet(X, Y)
         n_train = len(source)
         split = n_train // 3
@@ -191,11 +197,25 @@ if __name__ == '__main__':
     for path in paths:
         train = trainer(data_path=pathlib.Path(path))
         X, Y1, Y2 = DataLoader.get_data_and_hierarchical_label(pathlib.Path(path))
+        total_len = len(X)
         _, _, tokenize = train.get_data_and_tokenzier(num_accept=2000)
-        low_level_nums = max(Y1) +1
+        low_level_nums = max(Y1) + 1
         train.train_model(X, Y1, num_classes=low_level_nums, tokenize=tokenize, model_path=pathlib.Path(path),
-                          model_name= 'low_level_model')
-
+                          model_name='low_level_model', skip=True)
+        x_container = [[] for i in range(low_level_nums)]
+        y_container = [[] for i in range(low_level_nums)]
+        numclasser_container = [0] * low_level_nums
+        for i in range(total_len):
+            # ipdb.set_trace()
+            x_container[Y1[i]].append(X[i])
+            y_container[Y1[i]].append(Y2[i])
+            numclasser_container[Y1[i]] = max(numclasser_container[Y1[i]], Y2[i])
+        print(numclasser_container)
+        for i in range(low_level_nums):
+            # ipdb.set_trace()
+            train.train_model(x_container[i], y_container[i], num_classes=numclasser_container[i]+1, tokenize=tokenize,
+                              model_path=pathlib.Path(path),
+                              model_name=f'high_level_model_for_{i}', skip=False)
         # 训练一个分出一类标签的数据
 
     # train.train()
