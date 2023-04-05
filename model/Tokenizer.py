@@ -43,6 +43,22 @@ class tokenizer(object):
         # sentence = sent_tokenize(s)
         return
 
+    def fit_on_texts(self, texts, num_accept=1000):
+        from collections import Counter
+        tem = []
+        for text in texts:
+            tokens = word_tokenize(text)
+            tem.extend(tokens)
+        d = Counter(tem)
+        # print(d)
+        s_d = list(sorted(d.items(), key=lambda x: -x[1]))
+        for word, _ in s_d:
+            new_id = len(self.word_to_id)
+            if new_id == num_accept:
+                break
+            self.word_to_id[word] = new_id
+            self.id_to_word[new_id] = word
+
     def convert_word_to_id(self, words: list[str]) -> list[int]:
         ret = []
         for word in words:
@@ -51,8 +67,8 @@ class tokenizer(object):
             if tem_word in self.word_to_id:
                 # ipdb.set_trace()
                 ret.append(self.word_to_id[tem_word])
-            else:
-                ret.append(self.word_to_id['<unk>'])
+            # else:
+            #     ret.append(self.word_to_id['<unk>'])
         return ret
 
     def convert_id_to_word(self, ids: list[int]) -> list[str]:
@@ -67,8 +83,9 @@ if __name__ == '__main__':
     paragraph = "The first time I heard that song was in Hawaii on radio. I was just a kid, and loved it very much! What a fantastic song!"
     print(paragraph)
     tz = tokenizer()
-    tz.fit_on_text(paragraph)
-    ids = tz.convert_word_to_id(word_tokenize(paragraph))
-    print(ids)
-    words = tz.convert_id_to_word(ids)
-    print(" ".join(words))
+    tz.fit_on_texts([paragraph])
+    print(tz.word_to_id)
+    # ids = tz.convert_word_to_id(word_tokenize(paragraph))
+    # print(ids)
+    # words = tz.convert_id_to_word(ids)
+    # print(" ".join(words))

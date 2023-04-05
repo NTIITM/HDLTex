@@ -2,6 +2,7 @@
 加载数据
 """
 import pathlib
+import torch.utils.data.dataset as dataset
 
 
 def get_data_and_labels(path_X, path_Y):
@@ -12,7 +13,24 @@ def get_data_and_labels(path_X, path_Y):
         X = x.readlines()
     with open(path_Y, "r") as y:
         Y = y.readlines()
+        Y = [int(y.strip('\n')) for y in Y]
     return X, Y
+
+
+def get_data_and_hierarchical_label(path):
+    assert path is not None
+    X = []
+    Y1 = []
+    Y2 = []
+    with open(path / "X.txt", "r") as x:
+        X = x.readlines()
+    with open(path / "YL1.txt", "r") as y:
+        Y1 = y.readlines()
+        Y1 = [int(y.strip('\n')) for y in Y1]
+    with open(path / "YL2.txt", "r") as y:
+        Y2 = y.readlines()
+        Y2 = [int(y.strip('\n')) for y in Y2]
+    return X, Y1, Y2
 
 
 # Press the green button in the gutter to run the script.

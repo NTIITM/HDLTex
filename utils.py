@@ -33,6 +33,7 @@ def get_device(gpu):
 def mean(nums):
     return sum(nums) / len(nums)
 
+
 # 一次获得一个batch
 def get_batches(input_list, batch_size):
     return [input_list[i: i + batch_size] for i in range(0, len(input_list), batch_size)]
@@ -54,7 +55,15 @@ def get_possible_spans(word_idxs, num_wordpieces, max_word_gram, max_subword_gra
 class Log:
     @staticmethod
     def info(message):
-        print(colored(message, 'green'))
+        print(colored(message, 'blue'))
+
+    @staticmethod
+    def add_info(path: Path, info):
+        tem = []
+        if path.exists():
+            tem.extend(OrJson.load(path))
+        tem.append(info)
+        OrJson.dump(tem, Path)
 
 
 class String:
@@ -219,7 +228,7 @@ class Pickle:
         for t in threads:
             t.join()
         time2 = time.perf_counter()
-        print(f'OK in {time2-time1:.1f} secs')
+        print(f'OK in {time2 - time1:.1f} secs')
 
 
 class Process:
