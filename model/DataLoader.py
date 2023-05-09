@@ -31,7 +31,16 @@ def get_data_and_hierarchical_label(path):
         Y2 = y.readlines()
         Y2 = [int(y.strip('\n')) for y in Y2]
     return X, Y1, Y2
-
+def get_data_and__label(path):
+    assert path is not None
+    X = []
+    Y = []
+    with open(path / "X.txt", "r") as x:
+        X = x.readlines()
+    with open(path / "Y.txt", "r") as y:
+        Y1 = y.readlines()
+        Y1 = [int(y.strip('\n')) for y in Y1]
+    return X, Y1
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
